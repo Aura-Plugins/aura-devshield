@@ -49,4 +49,21 @@ func main() {
 			extension.Path,
 		)
 	}
+
+	multiVersionExtensions := vscode.FindMultiVersionExtensions(extensions)
+
+	fmt.Printf(
+		"\nFound %d extensions with multiple versions installed:\n\n",
+		len(multiVersionExtensions),
+	)
+
+	for id, versions := range multiVersionExtensions {
+		fmt.Println(id)
+
+		for _, extension := range versions {
+			fmt.Printf("  - %s\n", extension.Version)
+		}
+
+		fmt.Println()
+	}
 }

@@ -43,7 +43,7 @@ func main() {
 	for _, extension := range extensions {
 		fmt.Printf(
 			"%s | %s\n  Version: %s\n  Path: %s\n",
-			extension.ID(),
+			extension.CanonicalID(),
 			extension.DisplayName,
 			extension.Version,
 			extension.Path,

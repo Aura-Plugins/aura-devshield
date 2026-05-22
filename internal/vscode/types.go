@@ -1,4 +1,5 @@
 package vscode
+import "strings"
 
 type Extension struct {
 	Name   string `json:"name"`
@@ -11,4 +12,8 @@ type Extension struct {
 
 func (e Extension) ID() string {
 	return e.Publisher + "." + e.Name
+}
+
+func (e Extension) CanonicalID() string {
+	return strings.ToLower(e.ID())
 }

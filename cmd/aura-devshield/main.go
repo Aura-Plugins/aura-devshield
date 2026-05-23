@@ -62,6 +62,15 @@ func main() {
 		vscode.FindInvalidMetadataFindings(extensions)...,
 	)
 
+	symlinkFindings, err := vscode.FindSymlinkedExtensionDirectoryFindings(extensionsDir)
+	if err != nil {
+		fmt.Println("Error scanning symlinked extension directories:", err)
+		return
+	}
+
+	findings = append(findings, symlinkFindings...)
+
+
 	// Keep instance-level findings for now.
 	// Deduplication may be exposed later through a --dedupe flag.
 	// findings = scanner.DeduplicateFindings(findings)

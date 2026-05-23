@@ -39,6 +39,7 @@ func FindMultiVersionFindings(extensions []*Extension) []scanner.Finding {
 				id,
 				strings.Join(installedVersions, ", "),
 			),
+			
 		}
 
 		findings = append(findings, finding)

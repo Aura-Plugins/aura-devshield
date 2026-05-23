@@ -33,6 +33,8 @@ func FindInvalidMetadataFindings(
 
 				Target: extension.CanonicalID(),
 
+				Path: extension.Path,
+
 				Description: fmt.Sprintf(
 					"Extension %s has an empty display name.",
 					extension.CanonicalID(),
@@ -56,7 +58,10 @@ func FindInvalidMetadataFindings(
 
 				Title: "Extension has unresolved metadata placeholders",
 
-				Target: extension.CanonicalID(),
+				Path: extension.Path,
+
+				// Target: extension.CanonicalID(),
+				Target: extension.CanonicalID() + "@" + extension.Version,
 
 				Description: fmt.Sprintf(
 					"Extension %s contains unresolved placeholder metadata: %s.",

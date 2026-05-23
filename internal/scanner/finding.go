@@ -24,4 +24,5 @@ type Finding struct {
 	Title       string   `json:"title"`
 	Description string   `json:"description"`
 	Target      string   `json:"target"`
+	Path        string   `json:"path,omitempty"`
 }

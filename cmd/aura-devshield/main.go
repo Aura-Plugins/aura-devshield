@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/matias2018/aura-devshield/internal/vscode"
+	"github.com/matias2018/aura-devshield/internal/output"
 )
 
 func main() {
@@ -38,8 +39,7 @@ func main() {
 		return
 	}
 
-	fmt.Printf("\nParsed %d extensions:\n\n", len(extensions))
-
+	output.PrintExtensions(extensions)
 	for _, extension := range extensions {
 		fmt.Printf(
 			"%s | %s\n  Version: %s\n  Path: %s\n",
@@ -50,20 +50,12 @@ func main() {
 		)
 	}
 
-	multiVersionExtensions := vscode.FindMultiVersionExtensions(extensions)
+	findings := vscode.FindMultiVersionFindings(extensions)
 
-	fmt.Printf(
-		"\nFound %d extensions with multiple versions installed:\n\n",
-		len(multiVersionExtensions),
-	)
-
-	for id, versions := range multiVersionExtensions {
-		fmt.Println(id)
-
-		for _, extension := range versions {
-			fmt.Printf("  - %s\n", extension.Version)
-		}
-
-		fmt.Println()
+	output.PrintFindings(findings)
+	for _, finding := range findings {
+		fmt.Printf("[%s] %s\n", finding.Severity, finding.Title)
+		fmt.Printf("Target: %s\n", finding.Target)
+		fmt.Printf("%s\n\n", finding.Description)
 	}
 }

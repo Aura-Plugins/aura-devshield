@@ -20,10 +20,20 @@ func FindMultiVersionFindings(extensions []*Extension) []scanner.Finding {
 		}
 
 		finding := scanner.Finding{
-			ID:       "vscode.multiple_installed_versions",
+			ID: "vscode.multiple_installed_versions",
+
+			Fingerprint: scanner.GenerateFingerprint(
+				"vscode.multiple_installed_versions",
+				id,
+				strings.Join(installedVersions, ","),
+			),
+
 			Severity: scanner.SeverityMedium,
-			Title:    "Multiple installed versions of VS Code extension",
-			Target:   id,
+
+			Title: "Multiple installed versions of VS Code extension",
+
+			Target: id,
+
 			Description: fmt.Sprintf(
 				"Extension %s has multiple versions installed: %s.",
 				id,

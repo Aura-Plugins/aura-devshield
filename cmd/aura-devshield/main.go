@@ -1,15 +1,22 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
-	"github.com/matias2018/aura-devshield/internal/vscode"
 	"github.com/matias2018/aura-devshield/internal/output"
+	"github.com/matias2018/aura-devshield/internal/scanner"
+	"github.com/matias2018/aura-devshield/internal/vscode"
 )
 
 func main() {
-	fmt.Println("Hello, Aura DevShield!")
+	jsonOutput := flag.Bool("json", false, "Output findings as JSON")
+	flag.Parse()
+
+	if !*jsonOutput {
+		fmt.Println("Starting... Aura DevShield!")
+	}
 
 	extensionsDir, err := vscode.ExtensionsDir()
 	if err != nil {
@@ -17,8 +24,10 @@ func main() {
 		return
 	}
 
-	fmt.Println("VS Code extensions directory:")
-	fmt.Println(extensionsDir)
+	if !*jsonOutput {
+		fmt.Println("VS Code extensions directory:")
+		fmt.Println(extensionsDir)
+	}
 
 	info, err := os.Stat(extensionsDir)
 	if err != nil {
@@ -31,7 +40,9 @@ func main() {
 		return
 	}
 
-	fmt.Println("Directory exists")
+	if !*jsonOutput {
+		fmt.Println("Directory exists")
+	}
 
 	extensions, err := vscode.ScanExtensions(extensionsDir)
 	if err != nil {
@@ -39,23 +50,31 @@ func main() {
 		return
 	}
 
+	var findings []scanner.Finding
+
+	findings = append(
+		findings,
+		vscode.FindMultiVersionFindings(extensions)...,
+	)
+
+	findings = append(
+		findings,
+		vscode.FindInvalidMetadataFindings(extensions)...,
+	)
+
+	// Keep instance-level findings for now.
+	// Deduplication may be exposed later through a --dedupe flag.
+	// findings = scanner.DeduplicateFindings(findings)
+
+	if *jsonOutput {
+		if err := output.PrintFindingsJSON(findings); err != nil {
+			fmt.Println("Error writing JSON:", err)
+			return
+		}
+
+		return
+	}
+
 	output.PrintExtensions(extensions)
-	for _, extension := range extensions {
-		fmt.Printf(
-			"%s | %s\n  Version: %s\n  Path: %s\n",
-			extension.CanonicalID(),
-			extension.DisplayName,
-			extension.Version,
-			extension.Path,
-		)
-	}
-
-	findings := vscode.FindMultiVersionFindings(extensions)
-
 	output.PrintFindings(findings)
-	for _, finding := range findings {
-		fmt.Printf("[%s] %s\n", finding.Severity, finding.Title)
-		fmt.Printf("Target: %s\n", finding.Target)
-		fmt.Printf("%s\n\n", finding.Description)
-	}
 }

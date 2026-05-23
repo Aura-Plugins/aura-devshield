@@ -1,6 +1,6 @@
 package scanner
 
-/* 
+/*
 This file defines the Finding struct, which represents a security finding or issue detected during the scanning process.
 This gives us a reusable finding format for future scanners:
 	VS Code scanner
@@ -12,15 +12,16 @@ This gives us a reusable finding format for future scanners:
 type Severity string
 
 const (
-	SeverityLow	Severity = "Low"
+	SeverityLow    Severity = "Low"
 	SeverityMedium Severity = "Medium"
-	SeverityHigh Severity = "High"
+	SeverityHigh   Severity = "High"
 )
 
 type Finding struct {
-	ID          string
-	Severity    Severity
-	Title       string
-	Description string
-	Target      string
+	ID          string   `json:"id"`
+	Fingerprint string   `json:"fingerprint"`
+	Severity    Severity `json:"severity"`
+	Title       string   `json:"title"`
+	Description string   `json:"description"`
+	Target      string   `json:"target"`
 }

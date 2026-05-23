@@ -8,7 +8,7 @@ func ScanExtensions(extensionsDir string) ([]*Extension, error) {
 	entries, err := ListExtensions(extensionsDir)
 	if err != nil {
 		return nil, err
-	} 
+	}
 
 	var extensions []*Extension
 
@@ -18,7 +18,7 @@ func ScanExtensions(extensionsDir string) ([]*Extension, error) {
 		}
 
 		extensionPath := filepath.Join(
-			extensionsDir, 
+			extensionsDir,
 			entry.Name(),
 		)
 
@@ -26,7 +26,7 @@ func ScanExtensions(extensionsDir string) ([]*Extension, error) {
 		if err != nil {
 			continue
 		}
-		
+
 		extensions = append(extensions, extension)
 	}
 

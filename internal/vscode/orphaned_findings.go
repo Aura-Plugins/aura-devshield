@@ -14,7 +14,7 @@ func FindOrphanedDirectoryFindings(extensionsDir string) ([]scanner.Finding, err
 		findings = append(findings, scanner.Finding{
 			ID:          "vscode.orphaned_extension_directory",
 			Title:       "Orphaned VS Code extension directory",
-			Severity:    "low",
+			Severity:    scanner.SeverityLow,
 			Description: "A directory exists inside the VS Code extensions folder but does not contain a valid package.json file.",
 			Target:      dir,
 			Path:        dir,

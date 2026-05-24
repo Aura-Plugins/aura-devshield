@@ -14,7 +14,7 @@ func FindSymlinkedExtensionDirectoryFindings(extensionsDir string) ([]scanner.Fi
 		findings = append(findings, scanner.Finding{
 			ID:          "vscode.symlinked_extension_directory",
 			Fingerprint: scanner.GenerateFingerprint("vscode.symlinked_extension_directory", dir),
-			Severity:    "Low",
+			Severity:    scanner.SeverityLow,
 			Title:       "Symlinked VS Code extension directory",
 			Description: "A VS Code extension directory is a symbolic link. This may be legitimate during development, but it can also obscure where extension code is actually stored.",
 			Target:      dir,

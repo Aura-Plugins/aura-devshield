@@ -18,11 +18,12 @@ const (
 )
 
 type Finding struct {
-	ID          string   `json:"id"`
-	Fingerprint string   `json:"fingerprint"`
-	Severity    Severity `json:"severity"`
-	Title       string   `json:"title"`
-	Description string   `json:"description"`
-	Target      string   `json:"target"`
-	Path        string   `json:"path,omitempty"`
+	ID          string            `json:"id"`
+	Fingerprint string            `json:"fingerprint"`
+	Severity    Severity          `json:"severity"`
+	Title       string            `json:"title"`
+	Description string            `json:"description"`
+	Target      string            `json:"target"`
+	Path        string            `json:"path,omitempty"`
+	Metadata    map[string]string `json:"metadata,omitempty"`
 }

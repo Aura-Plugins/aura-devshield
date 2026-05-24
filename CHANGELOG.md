@@ -7,10 +7,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-### Changed
-
-- Repository and Homebrew tap moved from `matias2018` to the `Aura-Plugins` GitHub organisation. Go module path updated to `github.com/Aura-Plugins/aura-devshield`. Homebrew install command is now `brew tap aura-plugins/tap && brew install aura-devshield`.
-
 ---
 
 ## [0.3.0]
@@ -33,10 +29,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **`install.sh`** — curl-pipe-bash install script. Detects OS and architecture, fetches the latest release from the GitHub API, downloads the binary, verifies the SHA256 checksum, and installs to `/usr/local/bin` (overridable via `INSTALL_DIR`).
 - **`Formula/aura-devshield.rb`** — Homebrew formula at `github.com/Aura-Plugins/homebrew-tap`. Builds from source using the release tarball.
 - **Terminal UI** — ANSI-styled output with severity icons, colour-coded sections, and grouped findings. Plain text when output is piped. Implemented in `internal/output/tui.go` using only the Go standard library.
+- **`--delay` flag** on `scan` and `apply` — overrides the quarantine window for a single run without changing config. Accepts any Go duration string (`48h`, `72h`, `168h`, etc.). Falls back to `quarantine_days` from config when omitted.
 - CLI subcommands: `scan`, `apply`, `clean`. Bare flags (e.g. `aura-devshield --json`) continue to work as `scan` for backwards compatibility.
 
 ### Changed
 
+- Repository and Homebrew tap moved to the `Aura-Plugins` GitHub organisation. Go module path is now `github.com/Aura-Plugins/aura-devshield`. Homebrew install: `brew tap aura-plugins/tap && brew install aura-devshield`.
+- Quarantine functions now accept `time.Duration` instead of `int` days, enabling sub-day precision via `--delay`.
+- Quarantine finding metadata keys updated: `time_remaining` and `policy` replace `days_remaining` and `quarantine_policy`. Values are human-readable strings (e.g. `"2 days"`, `"48h"`) rather than raw integers.
 - `main.go` refactored from a flat script into a subcommand-based CLI using `flag.FlagSet` per command.
 - `prepare()` helper centralises config/state loading, extension scanning, and state update across subcommands.
 - `PrintFindings` now renders `Path` and `Metadata` fields when present.

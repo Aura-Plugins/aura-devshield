@@ -2,6 +2,7 @@ package output
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/Aura-Plugins/aura-devshield/internal/scanner"
 	"github.com/Aura-Plugins/aura-devshield/internal/vscode"
@@ -76,10 +77,20 @@ func PrintExtensions(extensions []*vscode.Extension) {
 	fmt.Println()
 }
 
-func PrintQuarantinePolicy(days int) {
-	fmt.Printf("\n  Quarantine policy: %s\n",
-		col(fmt.Sprintf("%d days", days), ansiBold),
-	)
+func PrintQuarantinePolicy(delay time.Duration) {
+	h := int(delay.Hours())
+	var label string
+	if h%24 == 0 {
+		days := h / 24
+		if days == 1 {
+			label = "1 day"
+		} else {
+			label = fmt.Sprintf("%d days", days)
+		}
+	} else {
+		label = fmt.Sprintf("%dh", h)
+	}
+	fmt.Printf("\n  Quarantine policy: %s\n", col(label, ansiBold))
 }
 
 func PrintQuarantineResults(results []vscode.QuarantineResult, settingsPath string, applied bool) {

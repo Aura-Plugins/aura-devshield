@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/Aura-Plugins/aura-devshield/internal/config"
 	"github.com/Aura-Plugins/aura-devshield/internal/output"
@@ -48,11 +49,18 @@ func runScan(args []string) {
 	flags := flag.NewFlagSet("scan", flag.ExitOnError)
 	jsonOutput := flags.Bool("json", false, "Output findings as JSON")
 	list := flags.Bool("list", false, "Also print all installed extensions")
+	delayFlag := flags.String("delay", "", "Quarantine window override, e.g. 48h, 72h, 168h (default: from config)")
 	flags.Parse(args)
 
 	ss, err := prepare()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
+		os.Exit(1)
+	}
+
+	delay, err := resolveDelay(ss.cfg, *delayFlag)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: invalid --delay value %q: use a duration like 48h, 72h, 168h\n", *delayFlag)
 		os.Exit(1)
 	}
 
@@ -64,7 +72,7 @@ func runScan(args []string) {
 
 	findings = append(findings, vscode.FindMultiVersionFindings(ss.extensions)...)
 	findings = append(findings, vscode.FindInvalidMetadataFindings(ss.extensions)...)
-	findings = append(findings, vscode.FindQuarantineFindings(ss.extensions, ss.st, ss.cfg.QuarantineDays)...)
+	findings = append(findings, vscode.FindQuarantineFindings(ss.extensions, ss.st, delay)...)
 
 	symlinkFindings, err := vscode.FindSymlinkedExtensionDirectoryFindings(ss.extensionsDir)
 	if err != nil && !*jsonOutput {
@@ -98,11 +106,18 @@ func runScan(args []string) {
 func runApply(args []string) {
 	flags := flag.NewFlagSet("apply", flag.ExitOnError)
 	confirm := flags.Bool("confirm", false, "Write changes to VS Code settings.json")
+	delayFlag := flags.String("delay", "", "Quarantine window override, e.g. 48h, 72h, 168h (default: from config)")
 	flags.Parse(args)
 
 	ss, err := prepare()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
+		os.Exit(1)
+	}
+
+	delay, err := resolveDelay(ss.cfg, *delayFlag)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: invalid --delay value %q: use a duration like 48h, 72h, 168h\n", *delayFlag)
 		os.Exit(1)
 	}
 
@@ -112,7 +127,7 @@ func runApply(args []string) {
 		os.Exit(1)
 	}
 
-	quarantined := vscode.QuarantinedExtensionIDs(ss.extensions, ss.st, ss.cfg.QuarantineDays)
+	quarantined := vscode.QuarantinedExtensionIDs(ss.extensions, ss.st, delay)
 
 	quarantinedSet := make(map[string]bool, len(quarantined))
 	for _, id := range quarantined {
@@ -131,7 +146,7 @@ func runApply(args []string) {
 		}
 	}
 
-	output.PrintQuarantinePolicy(ss.cfg.QuarantineDays)
+	output.PrintQuarantinePolicy(delay)
 
 	if *confirm {
 		results, err := vscode.ApplyQuarantine(settingsPath, toPin, toRelease)
@@ -251,4 +266,14 @@ func prepare() (*scanState, error) {
 		extensionsDir: extensionsDir,
 		extensions:   extensions,
 	}, nil
+}
+
+// resolveDelay returns the quarantine duration to use for a command run.
+// If the --delay flag was provided it takes precedence; otherwise the value
+// from config is used (quarantine_days × 24h).
+func resolveDelay(cfg *config.Config, delayFlag string) (time.Duration, error) {
+	if delayFlag != "" {
+		return time.ParseDuration(delayFlag)
+	}
+	return time.Duration(cfg.QuarantineDays) * 24 * time.Hour, nil
 }

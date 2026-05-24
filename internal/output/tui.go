@@ -127,10 +127,10 @@ func tuiFinding(f scanner.Finding) {
 	if _, ok := f.Metadata["first_seen"]; ok {
 		date := strings.SplitN(f.Metadata["first_seen"], "T", 2)[0]
 		fmt.Printf("     %s\n",
-			col(fmt.Sprintf("first seen %s  ·  %s days remaining  ·  policy: %s days",
+			col(fmt.Sprintf("first seen %s  ·  %s remaining  ·  policy: %s",
 				date,
-				f.Metadata["days_remaining"],
-				f.Metadata["quarantine_policy"],
+				f.Metadata["time_remaining"],
+				f.Metadata["policy"],
 			), ansiGray),
 		)
 	}

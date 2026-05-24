@@ -99,3 +99,6 @@ languages/*.mo
 .*design*
 
 # Local deployment notes
+AS-currentState.md
+AS-specs&features.md
+devReadme.md

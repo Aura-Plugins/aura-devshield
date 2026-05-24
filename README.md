@@ -4,6 +4,8 @@ A local-first, privacy-focused security visibility tool for developer environmen
 
 Aura DevShield inspects your development tooling — starting with VS Code extensions — and surfaces supply-chain risks before they become incidents. No telemetry. No cloud. No account required.
 
+GitHub: [github.com/Aura-Plugins/aura-devshield](https://github.com/Aura-Plugins/aura-devshield)
+
 ---
 
 ## The problem
@@ -41,7 +43,7 @@ Pre-built binaries for every release are on the [GitHub Releases](https://github
 
 | Platform | Binary |
 |---|---|
-| macOS Apple Silicon | `aura-devshield-darwin-arm64` |
+| macOS Apple Silicon (M1/M2/M3) | `aura-devshield-darwin-arm64` |
 | macOS Intel | `aura-devshield-darwin-amd64` |
 | Linux x86-64 | `aura-devshield-linux-amd64` |
 | Windows x86-64 | `aura-devshield-windows-amd64.exe` |

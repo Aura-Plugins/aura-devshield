@@ -5,17 +5,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [Unreleased] — Phase 1 distribution
+## [Unreleased]
+
+### Changed
+
+- Repository and Homebrew tap moved from `matias2018` to the `Aura-Plugins` GitHub organisation. Go module path updated to `github.com/Aura-Plugins/aura-devshield`. Homebrew install command is now `brew tap aura-plugins/tap && brew install aura-devshield`.
+
+---
+
+## [0.3.0]
 
 ### Added
 
-- **`--version` flag** — prints the version string set at build time via `-ldflags "-X main.version=vX.Y.Z"`. Returns `dev` when built without ldflags.
-- **`Makefile`** — `build`, `build-all` (cross-compile for darwin/arm64, darwin/amd64, linux/amd64, windows/amd64), `vet`, `install`, `checksums`, `clean` targets. Version is read from the current git tag automatically.
-- **`.github/workflows/release.yml`** — GitHub Actions workflow that runs `go vet`, cross-compiles all targets, generates `checksums.txt`, and publishes a GitHub Release when a `v*` tag is pushed.
-- **`install.sh`** — curl-pipe-bash install script. Detects OS and architecture, fetches the latest release from the GitHub API, downloads the binary, verifies the SHA256 checksum, and installs to `/usr/local/bin` (overridable via `INSTALL_DIR`).
-- **`Formula/aura-devshield.rb`** — Homebrew formula template for publishing to a tap (`brew tap aura-plugins/tap && brew install aura-devshield`). Builds from source using the release tarball.
-
-- **Update quarantine system** — new `vscode.update_in_quarantine` finding (Medium). Every extension version is stamped with a `first_seen` timestamp on first scan. Versions within the configurable quarantine window are flagged so updates are not blindly trusted. Default window: 7 days. Motivated by the wave of supply-chain attacks in May 2026.
+- **Update quarantine system** — new `vscode.update_in_quarantine` finding (Medium). Every extension version is stamped with a `first_seen` timestamp on first scan. Versions within the configurable quarantine window are flagged so updates are not blindly trusted. Default window: 7 days. Motivated by the wave of supply-chain attacks targeting VS Code extensions in May 2026.
 - **`apply` subcommand** — previews and writes per-extension `extensions.autoUpdate` pins to VS Code `settings.json`. Dry-run by default; requires `--confirm` to write. Releases pins automatically when extensions clear the quarantine window.
 - **`clean` subcommand** — finds and removes duplicate versions (keeping highest semver), malformed extensions (missing `name` or `publisher`), and orphaned directories. Dry-run by default; requires `--confirm` to delete.
 - **`internal/state/` package** — persistent local state at `~/.aura-devshield/state.json`. Stores first-seen timestamps per extension version and tracks which extensions the tool has pinned.
@@ -25,6 +27,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **`internal/vscode/clean.go`** — `FindCleanTargets`, `Clean`, semver comparison via `compareVersions`.
 - **`scanner.Scanner` interface** — foundation for future npm, GitHub Actions, Composer, and pip scanners.
 - **`Metadata map[string]string` field on `Finding`** — carries structured per-finding context (e.g. `first_seen`, `days_remaining`, `quarantine_policy`).
+- **`--version` flag** — prints the version string set at build time via `-ldflags "-X main.version=vX.Y.Z"`. Returns `dev` when built without ldflags.
+- **`Makefile`** — `build`, `build-all` (cross-compile for darwin/arm64, darwin/amd64, linux/amd64, windows/amd64), `vet`, `install`, `checksums`, `clean` targets. Version is read from the current git tag automatically.
+- **`.github/workflows/release.yml`** — GitHub Actions workflow that runs `go vet`, cross-compiles all targets, generates `checksums.txt`, and publishes a GitHub Release when a `v*` tag is pushed.
+- **`install.sh`** — curl-pipe-bash install script. Detects OS and architecture, fetches the latest release from the GitHub API, downloads the binary, verifies the SHA256 checksum, and installs to `/usr/local/bin` (overridable via `INSTALL_DIR`).
+- **`Formula/aura-devshield.rb`** — Homebrew formula at `github.com/Aura-Plugins/homebrew-tap`. Builds from source using the release tarball.
+- **Terminal UI** — ANSI-styled output with severity icons, colour-coded sections, and grouped findings. Plain text when output is piped. Implemented in `internal/output/tui.go` using only the Go standard library.
 - CLI subcommands: `scan`, `apply`, `clean`. Bare flags (e.g. `aura-devshield --json`) continue to work as `scan` for backwards compatibility.
 
 ### Changed
@@ -32,6 +40,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `main.go` refactored from a flat script into a subcommand-based CLI using `flag.FlagSet` per command.
 - `prepare()` helper centralises config/state loading, extension scanning, and state update across subcommands.
 - `PrintFindings` now renders `Path` and `Metadata` fields when present.
+- Terminal output extracted into `internal/output/` package (`terminal.go`, `tui.go`, `json.go`).
 
 ### Fixed
 

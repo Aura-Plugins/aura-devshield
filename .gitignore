@@ -98,7 +98,8 @@ languages/*.mo
 *.xd
 .*design*
 
-# Local deployment notes
-AS-currentState.md
-AS-specs&features.md
+# Local notes and internal docs
+AS-*.md
+CurrentAuraDevShieldState.md
 devReadme.md
+functional-drawing.md

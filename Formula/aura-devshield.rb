@@ -15,7 +15,7 @@ class AuraDevshield < Formula
   desc "Local-first developer supply-chain security visibility tool"
   homepage "https://github.com/matias2018/aura-devshield"
   url "https://github.com/matias2018/aura-devshield/archive/refs/tags/v0.1.0.tar.gz"
-  sha256 "REPLACE_WITH_SHA256_OF_v0.1.0_TARBALL"
+  sha256 "d8bc137d0ef8798ee7e3881b6d5227f5a46bbea8e39b0507740139f3524d174f"
   license "MIT"
   head "https://github.com/matias2018/aura-devshield.git", branch: "main"
 

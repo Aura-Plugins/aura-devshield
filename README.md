@@ -83,11 +83,28 @@ aura-devshield scan --json
 
 On first run, every installed extension version is stamped with a `first_seen` timestamp. Re-run `scan` regularly to keep the quarantine clock moving.
 
+#### `--delay` — override the quarantine window for this run
+
+```bash
+aura-devshield scan --delay 48h    # flag extensions newer than 48 hours
+aura-devshield scan --delay 72h    # flag extensions newer than 72 hours
+aura-devshield scan --delay 168h   # flag extensions newer than 7 days
+```
+
+The `--delay` flag accepts any duration in hours (`h`). It overrides the `quarantine_days` value in your config **for this run only** — it does not change the config file. Omitting the flag uses the configured default (7 days).
+
+| Value | Equivalent | When to use |
+|---|---|---|
+| `48h` | 2 days | Aggressive — you check daily and want a short window |
+| `72h` | 3 days | Balanced short window |
+| `168h` | 7 days | Same as the default config |
+| `336h` | 14 days | Extra caution after a known attack wave |
+
 ---
 
 ### `apply` — enforce the quarantine policy
 
-Pin extensions whose updates are within the quarantine window, and release pins for extensions that have cleared it. **Dry-run by default.**
+Writes pins to VS Code `settings.json` for extensions inside the quarantine window, and releases pins for extensions that have cleared it. **Dry-run by default** — always preview before writing.
 
 ```bash
 aura-devshield apply             # preview what would change
@@ -96,9 +113,25 @@ aura-devshield apply --confirm   # write changes to VS Code settings.json
 
 What `--confirm` does:
 
-- Adds `"publisher.name": false` entries to `extensions.autoUpdate` in VS Code `settings.json` for quarantined extensions — disabling auto-update for those extensions only.
-- Removes those entries once extensions clear the quarantine window.
+- Adds `"publisher.name": false` to `extensions.autoUpdate` in VS Code `settings.json` for each quarantined extension — disabling silent auto-update for those extensions only.
+- Removes those entries once extensions clear the quarantine window, re-enabling auto-update.
 - Your other VS Code settings are never touched.
+- Only manages pins it set itself — never removes entries you added manually.
+
+#### `--delay` with `apply`
+
+```bash
+aura-devshield apply --delay 48h             # preview using a 48h window
+aura-devshield apply --delay 48h --confirm   # pin extensions newer than 48h
+```
+
+The `--delay` flag works the same way as in `scan`: it overrides the quarantine window for this run only. **Use the same value for both commands** so that what `scan` flags is exactly what `apply` pins.
+
+```bash
+# Recommended pattern — scan and apply with the same window:
+aura-devshield scan  --delay 72h
+aura-devshield apply --delay 72h --confirm
+```
 
 ---
 

@@ -3,8 +3,8 @@ package output
 import (
 	"fmt"
 
-	"github.com/matias2018/aura-devshield/internal/scanner"
-	"github.com/matias2018/aura-devshield/internal/vscode"
+	"github.com/Aura-Plugins/aura-devshield/internal/scanner"
+	"github.com/Aura-Plugins/aura-devshield/internal/vscode"
 )
 
 // PrintFindings renders all findings in the TUI style, grouped High → Medium → Low.

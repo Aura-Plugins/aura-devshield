@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/matias2018/aura-devshield/internal/scanner"
-	"github.com/matias2018/aura-devshield/internal/state"
+	"github.com/Aura-Plugins/aura-devshield/internal/scanner"
+	"github.com/Aura-Plugins/aura-devshield/internal/state"
 )
 
 // UpdateState records first-seen timestamps for each scanned extension version.

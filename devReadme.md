@@ -146,7 +146,7 @@ internal/npm/
 ```go
 package npm
 
-import "github.com/matias2018/aura-devshield/internal/scanner"
+import "github.com/Aura-Plugins/aura-devshield/internal/scanner"
 
 type Scanner struct {
     WorkDir string // directory containing package.json

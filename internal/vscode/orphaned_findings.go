@@ -1,6 +1,6 @@
 package vscode
 
-import "github.com/matias2018/aura-devshield/internal/scanner"
+import "github.com/Aura-Plugins/aura-devshield/internal/scanner"
 
 func FindOrphanedDirectoryFindings(extensionsDir string) ([]scanner.Finding, error) {
 	orphanedDirs, err := FindOrphanedExtensionDirs(extensionsDir)

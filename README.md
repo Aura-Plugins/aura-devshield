@@ -19,25 +19,25 @@ Aura DevShield gives you that visibility, and gives newly-released updates a coo
 ### Script (macOS and Linux — recommended)
 
 ```bash
-curl -sSfL https://raw.githubusercontent.com/matias2018/aura-devshield/main/install.sh | bash
+curl -sSfL https://raw.githubusercontent.com/Aura-Plugins/aura-devshield/main/install.sh | bash
 ```
 
 Installs to `/usr/local/bin`. Override the directory with `INSTALL_DIR`:
 
 ```bash
-INSTALL_DIR=~/.local/bin bash <(curl -sSfL https://raw.githubusercontent.com/matias2018/aura-devshield/main/install.sh)
+INSTALL_DIR=~/.local/bin bash <(curl -sSfL https://raw.githubusercontent.com/Aura-Plugins/aura-devshield/main/install.sh)
 ```
 
 ### Homebrew (macOS and Linux)
 
 ```bash
-brew tap matias2018/tap
+brew tap aura-plugins/tap
 brew install aura-devshield
 ```
 
 ### Download binary directly
 
-Pre-built binaries for every release are on the [GitHub Releases](https://github.com/matias2018/aura-devshield/releases) page. Download the binary for your platform, make it executable, and move it to your PATH.
+Pre-built binaries for every release are on the [GitHub Releases](https://github.com/Aura-Plugins/aura-devshield/releases) page. Download the binary for your platform, make it executable, and move it to your PATH.
 
 | Platform | Binary |
 |---|---|
@@ -53,7 +53,7 @@ Each release includes a `checksums.txt` file for SHA256 verification.
 **Requirements:** Go 1.21 or later.
 
 ```bash
-git clone https://github.com/matias2018/aura-devshield
+git clone https://github.com/Aura-Plugins/aura-devshield
 cd aura-devshield
 make install          # builds and copies to /usr/local/bin
 # or

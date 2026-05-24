@@ -2,7 +2,7 @@ package output
 
 import (
 	"encoding/json"
-	"github.com/matias2018/aura-devshield/internal/scanner"
+	"github.com/Aura-Plugins/aura-devshield/internal/scanner"
 	"os"
 )
 

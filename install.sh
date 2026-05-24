@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Aura DevShield installer
-# Usage: curl -sSfL https://raw.githubusercontent.com/matias2018/aura-devshield/main/install.sh | bash
+# Usage: curl -sSfL https://raw.githubusercontent.com/Aura-Plugins/aura-devshield/main/install.sh | bash
 # Override install directory: INSTALL_DIR=/usr/bin bash install.sh
 
 set -euo pipefail
 
-REPO="matias2018/aura-devshield"
+REPO="Aura-Plugins/aura-devshield"
 APP="aura-devshield"
 INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
 

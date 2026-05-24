@@ -6,11 +6,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/matias2018/aura-devshield/internal/config"
-	"github.com/matias2018/aura-devshield/internal/output"
-	"github.com/matias2018/aura-devshield/internal/scanner"
-	"github.com/matias2018/aura-devshield/internal/state"
-	"github.com/matias2018/aura-devshield/internal/vscode"
+	"github.com/Aura-Plugins/aura-devshield/internal/config"
+	"github.com/Aura-Plugins/aura-devshield/internal/output"
+	"github.com/Aura-Plugins/aura-devshield/internal/scanner"
+	"github.com/Aura-Plugins/aura-devshield/internal/state"
+	"github.com/Aura-Plugins/aura-devshield/internal/vscode"
 )
 
 // version is set at build time via -ldflags "-X main.version=v1.0.0".

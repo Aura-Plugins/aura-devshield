@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/matias2018/aura-devshield/internal/scanner"
+	"github.com/Aura-Plugins/aura-devshield/internal/scanner"
 )
 
 // ANSI escape codes — only applied when stdout is a real terminal.

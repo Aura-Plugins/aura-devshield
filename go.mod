@@ -1,3 +1,3 @@
-module github.com/matias2018/aura-devshield
+module github.com/Aura-Plugins/aura-devshield
 
 go 1.26.3

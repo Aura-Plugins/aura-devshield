@@ -17,7 +17,7 @@
 class AuraDevshield < Formula
   desc "Local-first developer supply-chain security visibility tool"
   homepage "https://github.com/Aura-Plugins/aura-devshield"
-  version "0.3.0"
+  version "0.4.0"
   license "MIT"
 
   on_macos do

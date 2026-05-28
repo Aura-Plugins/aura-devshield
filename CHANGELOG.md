@@ -9,6 +9,27 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.4.0]
+
+### Added
+
+- **Exit codes** — `scan` exits `1` when findings are present and `0` when clean, enabling use as a CI gate. Both terminal and `--json` modes respect this.
+- **Interactive confirmation prompt** — `apply` and `clean` now prompt `[Y/n]` before writing or deleting. Only an uppercase `Y` proceeds; any other input aborts safely.
+- **`--confirm` flag** on `apply` and `clean` — skips the interactive prompt for use in scripts and automation pipelines.
+- **`--dry-run` flag** on `apply` and `clean` — previews changes without prompting. Replaces the previous implicit dry-run default.
+- **`tests.md`** — testing guide covering priority test cases, helper patterns, and CI integration instructions.
+
+### Changed
+
+- `apply` and `clean` now run for real by default (standard CLI pattern). The previous implicit dry-run-by-default behaviour is replaced by the explicit `--dry-run` flag.
+- Homebrew formula converted from a source build to a binary install. No Go toolchain or Xcode Command Line Tools required on the target machine.
+
+### Fixed
+
+- `apply` now preserves all existing per-extension entries in `extensions.autoUpdate` — including manually-added `true` values — when writing quarantine pins. Previously, only `false` entries tracked by this tool were written back, silently dropping any entries the user had added manually.
+
+---
+
 ## [0.3.0]
 
 ### Added

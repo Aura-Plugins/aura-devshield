@@ -23,19 +23,19 @@ class AuraDevshield < Formula
   on_macos do
     on_arm do
       url "https://github.com/Aura-Plugins/aura-devshield/releases/download/v#{version}/aura-devshield-darwin-arm64"
-      sha256 "REPLACE_WITH_SHA256_FROM_CHECKSUMS_TXT"
+      sha256 "6021da57bd93dffcf93cc5928cc93da637187d89ba3a8ea199e4e15867b2c26d"
     end
 
     on_intel do
       url "https://github.com/Aura-Plugins/aura-devshield/releases/download/v#{version}/aura-devshield-darwin-amd64"
-      sha256 "REPLACE_WITH_SHA256_FROM_CHECKSUMS_TXT"
+      sha256 "bd3ac782752c24a01ced2291ecff814190b1668d2d90299999979435e4e9b6cb"
     end
   end
 
   on_linux do
     on_amd64 do
       url "https://github.com/Aura-Plugins/aura-devshield/releases/download/v#{version}/aura-devshield-linux-amd64"
-      sha256 "REPLACE_WITH_SHA256_FROM_CHECKSUMS_TXT"
+      sha256 "5c1f3acb04415891517ec5641d35edede13285658cc90c957ea2a8ad80c8429f"
     end
   end
 

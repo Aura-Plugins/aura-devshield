@@ -92,7 +92,23 @@ func pinnedBySettings(settings map[string]interface{}) map[string]bool {
 	return pinned
 }
 
-func computeQuarantineResults(settings map[string]interface{}, toPin, toRelease []string) ([]QuarantineResult, map[string]bool) {
+// computeQuarantineResults applies pin/release changes to the autoUpdate map and
+// returns what changed plus the full updated map ready to write back.
+// All existing entries not in toPin or toRelease are preserved unchanged, so
+// manually added per-extension settings survive a round-trip through apply.
+func computeQuarantineResults(settings map[string]interface{}, toPin, toRelease []string) ([]QuarantineResult, map[string]interface{}) {
+	// Copy the full existing map so unrelated entries (including manually-added
+	// true values) are preserved. If the key holds a non-map value (global bool),
+	// we start empty — the tool only operates on the per-extension map form.
+	autoUpdate := make(map[string]interface{})
+	if val, ok := settings["extensions.autoUpdate"]; ok {
+		if m, ok := val.(map[string]interface{}); ok {
+			for k, v := range m {
+				autoUpdate[k] = v
+			}
+		}
+	}
+
 	currentPinned := pinnedBySettings(settings)
 	var results []QuarantineResult
 
@@ -100,7 +116,7 @@ func computeQuarantineResults(settings map[string]interface{}, toPin, toRelease 
 		if currentPinned[id] {
 			continue
 		}
-		currentPinned[id] = true
+		autoUpdate[id] = false
 		results = append(results, QuarantineResult{ExtensionID: id, Action: "pinned"})
 	}
 
@@ -108,11 +124,11 @@ func computeQuarantineResults(settings map[string]interface{}, toPin, toRelease 
 		if !currentPinned[id] {
 			continue
 		}
-		delete(currentPinned, id)
+		delete(autoUpdate, id)
 		results = append(results, QuarantineResult{ExtensionID: id, Action: "released"})
 	}
 
-	return results, currentPinned
+	return results, autoUpdate
 }
 
 // PreviewQuarantine returns what ApplyQuarantine would do without writing any files.
@@ -132,20 +148,15 @@ func ApplyQuarantine(settingsPath string, toPin, toRelease []string) ([]Quaranti
 		return nil, err
 	}
 
-	results, newPinned := computeQuarantineResults(settings, toPin, toRelease)
+	results, newAutoUpdate := computeQuarantineResults(settings, toPin, toRelease)
 	if len(results) == 0 {
 		return results, nil
 	}
 
-	autoUpdateMap := make(map[string]interface{})
-	for id := range newPinned {
-		autoUpdateMap[id] = false
-	}
-
-	if len(autoUpdateMap) == 0 {
+	if len(newAutoUpdate) == 0 {
 		delete(settings, "extensions.autoUpdate")
 	} else {
-		settings["extensions.autoUpdate"] = autoUpdateMap
+		settings["extensions.autoUpdate"] = newAutoUpdate
 	}
 
 	if err := writeSettings(settingsPath, settings); err != nil {

@@ -93,10 +93,29 @@ func PrintQuarantinePolicy(delay time.Duration) {
 	fmt.Printf("\n  Quarantine policy: %s\n", col(label, ansiBold))
 }
 
+// PrintQuarantineResults is used by the --dry-run path: shows the change list
+// with a footer that tells the user what to run next.
 func PrintQuarantineResults(results []vscode.QuarantineResult, settingsPath string, applied bool) {
+	if !PrintQuarantinePlan(results) {
+		return
+	}
+	if applied {
+		PrintQuarantineApplied(settingsPath)
+	} else {
+		fmt.Printf("  %s\n  %s\n\n",
+			col("Dry run — run 'aura-devshield apply' to write to:", ansiGray),
+			col("  "+settingsPath, ansiDim),
+		)
+	}
+}
+
+// PrintQuarantinePlan prints the pin/release change list and divider with no
+// footer, leaving room for a prompt or applied message. Returns true if there
+// are changes to show.
+func PrintQuarantinePlan(results []vscode.QuarantineResult) bool {
 	if len(results) == 0 {
 		fmt.Printf("\n  %s\n\n", col("No quarantine changes needed.", ansiGray))
-		return
+		return false
 	}
 
 	fmt.Println()
@@ -118,24 +137,39 @@ func PrintQuarantineResults(results []vscode.QuarantineResult, settingsPath stri
 	fmt.Println()
 	tuiDivider("")
 	fmt.Println()
+	return true
+}
 
+// PrintQuarantineApplied prints the "Applied to:" footer after a successful apply.
+func PrintQuarantineApplied(settingsPath string) {
+	fmt.Printf("  %s\n  %s\n\n",
+		col("Applied to:", ansiGray),
+		col("  "+settingsPath, ansiDim),
+	)
+}
+
+// PrintCleanTargets is used by the --dry-run path: shows the target list with a
+// footer that tells the user what to run next.
+func PrintCleanTargets(targets []vscode.CleanTarget, applied bool) {
+	if !PrintCleanPlan(targets) {
+		return
+	}
 	if applied {
-		fmt.Printf("  %s\n  %s\n\n",
-			col("Applied to:", ansiGray),
-			col("  "+settingsPath, ansiDim),
-		)
+		// PrintCleanPlan showed "Would remove N dirs:" header; restate as applied.
+		// (This path is not used after the interactive refactor but kept for compat.)
 	} else {
-		fmt.Printf("  %s\n  %s\n\n",
-			col("Dry run — run 'aura-devshield apply --confirm' to write to:", ansiGray),
-			col("  "+settingsPath, ansiDim),
+		fmt.Printf("  %s\n\n",
+			col("Run 'aura-devshield clean' to delete.", ansiGray),
 		)
 	}
 }
 
-func PrintCleanTargets(targets []vscode.CleanTarget, applied bool) {
+// PrintCleanPlan prints "Would remove N directories:" followed by the target list
+// and a divider, with no footer. Returns true if there are targets to show.
+func PrintCleanPlan(targets []vscode.CleanTarget) bool {
 	if len(targets) == 0 {
 		fmt.Printf("\n  %s\n\n", col("✓  Nothing to clean.", ansiBoldGreen))
-		return
+		return false
 	}
 
 	n := len(targets)
@@ -144,15 +178,9 @@ func PrintCleanTargets(targets []vscode.CleanTarget, applied bool) {
 		noun = "directory"
 	}
 
-	if applied {
-		fmt.Printf("\n  %s\n\n",
-			col(fmt.Sprintf("Removed %d %s.", n, noun), ansiBoldRed),
-		)
-	} else {
-		fmt.Printf("\n  %s\n\n",
-			col(fmt.Sprintf("Would remove %d %s:", n, noun), ansiBold),
-		)
-	}
+	fmt.Printf("\n  %s\n\n",
+		col(fmt.Sprintf("Would remove %d %s:", n, noun), ansiBold),
+	)
 
 	for _, t := range targets {
 		fmt.Printf("  %s  %s\n",
@@ -168,10 +196,19 @@ func PrintCleanTargets(targets []vscode.CleanTarget, applied bool) {
 
 	tuiDivider("")
 	fmt.Println()
+	return true
+}
 
-	if !applied {
-		fmt.Printf("  %s\n\n",
-			col("Run 'aura-devshield clean --confirm' to delete.", ansiGray),
-		)
+// PrintCleanApplied prints the "Removed N directories." confirmation.
+func PrintCleanApplied(n int) {
+	noun := "directories"
+	if n == 1 {
+		noun = "directory"
 	}
+	fmt.Printf("\n  %s\n\n", col(fmt.Sprintf("Removed %d %s.", n, noun), ansiBoldGreen))
+}
+
+// PrintAborted prints the cancellation message shown when a user declines a prompt.
+func PrintAborted() {
+	fmt.Printf("\n  %s\n\n", col("Aborted.", ansiGray))
 }

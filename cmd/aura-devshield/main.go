@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"os"
@@ -39,7 +40,7 @@ func main() {
 	case "clean":
 		runClean(args[1:])
 	default:
-		fmt.Fprintf(os.Stderr, "unknown command: %q\n\nUsage: aura-devshield [scan|apply|clean] [flags]\n\n  scan  [--json]      Report all findings (default)\n  apply [--confirm]   Pin/release extensions in VS Code settings\n  clean [--confirm]   Remove duplicate and malformed extensions\n", args[0])
+		fmt.Fprintf(os.Stderr, "unknown command: %q\n\nUsage: aura-devshield [scan|apply|clean] [flags]\n\n  scan  [--json]               Report all findings (default)\n  apply [--dry-run|--confirm]  Pin/release extensions in VS Code settings\n  clean [--dry-run|--confirm]  Remove duplicate and malformed extensions\n", args[0])
 		os.Exit(1)
 	}
 }
@@ -93,6 +94,9 @@ func runScan(args []string) {
 			fmt.Fprintln(os.Stderr, "Error writing JSON:", err)
 			os.Exit(1)
 		}
+		if len(findings) > 0 {
+			os.Exit(1)
+		}
 		return
 	}
 
@@ -100,12 +104,16 @@ func runScan(args []string) {
 		output.PrintExtensions(ss.extensions)
 	}
 	output.PrintFindings(findings, ss.extensionsDir, len(ss.extensions))
+	if len(findings) > 0 {
+		os.Exit(1)
+	}
 }
 
 // runApply pins quarantined extensions and releases cleared ones in VS Code settings.json.
 func runApply(args []string) {
 	flags := flag.NewFlagSet("apply", flag.ExitOnError)
-	confirm := flags.Bool("confirm", false, "Write changes to VS Code settings.json")
+	dryRun := flags.Bool("dry-run", false, "Preview changes without writing to VS Code settings.json")
+	confirm := flags.Bool("confirm", false, "Apply without interactive confirmation")
 	delayFlag := flags.String("delay", "", "Quarantine window override, e.g. 48h, 72h, 168h (default: from config)")
 	flags.Parse(args)
 
@@ -148,38 +156,51 @@ func runApply(args []string) {
 
 	output.PrintQuarantinePolicy(delay)
 
-	if *confirm {
-		results, err := vscode.ApplyQuarantine(settingsPath, toPin, toRelease)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error applying quarantine:", err)
-			os.Exit(1)
-		}
-
-		for _, id := range toPin {
-			ss.st.PinVSCodeExtension(id)
-		}
-		for _, id := range toRelease {
-			ss.st.UnpinVSCodeExtension(id)
-		}
-		if err := ss.st.Save(ss.statePath); err != nil {
-			fmt.Fprintf(os.Stderr, "Warning: could not save state: %v\n", err)
-		}
-
-		output.PrintQuarantineResults(results, settingsPath, true)
-	} else {
-		results, err := vscode.PreviewQuarantine(settingsPath, toPin, toRelease)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error previewing quarantine:", err)
-			os.Exit(1)
-		}
-		output.PrintQuarantineResults(results, settingsPath, false)
+	preview, err := vscode.PreviewQuarantine(settingsPath, toPin, toRelease)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error previewing quarantine:", err)
+		os.Exit(1)
 	}
+
+	if *dryRun {
+		output.PrintQuarantineResults(preview, settingsPath, false)
+		return
+	}
+
+	if !output.PrintQuarantinePlan(preview) {
+		return
+	}
+
+	if !*confirm && !promptConfirm("Apply these changes?") {
+		output.PrintAborted()
+		return
+	}
+
+	results, err := vscode.ApplyQuarantine(settingsPath, toPin, toRelease)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error applying quarantine:", err)
+		os.Exit(1)
+	}
+
+	for _, id := range toPin {
+		ss.st.PinVSCodeExtension(id)
+	}
+	for _, id := range toRelease {
+		ss.st.UnpinVSCodeExtension(id)
+	}
+	if err := ss.st.Save(ss.statePath); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: could not save state: %v\n", err)
+	}
+
+	output.PrintQuarantineApplied(settingsPath)
+	_ = results
 }
 
 // runClean removes duplicate versions, malformed extensions, and orphaned directories.
 func runClean(args []string) {
 	flags := flag.NewFlagSet("clean", flag.ExitOnError)
-	confirm := flags.Bool("confirm", false, "Actually remove directories")
+	dryRun := flags.Bool("dry-run", false, "Preview what would be removed without deleting")
+	confirm := flags.Bool("confirm", false, "Delete without interactive confirmation")
 	flags.Parse(args)
 
 	extensionsDir, err := vscode.ExtensionsDir()
@@ -200,14 +221,26 @@ func runClean(args []string) {
 		os.Exit(1)
 	}
 
-	if *confirm {
-		if err := vscode.Clean(targets); err != nil {
-			fmt.Fprintln(os.Stderr, "Error cleaning:", err)
-			os.Exit(1)
-		}
+	if *dryRun {
+		output.PrintCleanTargets(targets, false)
+		return
 	}
 
-	output.PrintCleanTargets(targets, *confirm)
+	if !output.PrintCleanPlan(targets) {
+		return
+	}
+
+	if !*confirm && !promptConfirm("Delete these directories?") {
+		output.PrintAborted()
+		return
+	}
+
+	if err := vscode.Clean(targets); err != nil {
+		fmt.Fprintln(os.Stderr, "Error cleaning:", err)
+		os.Exit(1)
+	}
+
+	output.PrintCleanApplied(len(targets))
 }
 
 // scanState holds everything needed to run findings across subcommands.
@@ -276,4 +309,16 @@ func resolveDelay(cfg *config.Config, delayFlag string) (time.Duration, error) {
 		return time.ParseDuration(delayFlag)
 	}
 	return time.Duration(cfg.QuarantineDays) * 24 * time.Hour, nil
+}
+
+// promptConfirm prints question and reads one line from stdin.
+// Returns true only if the user types exactly "Y".
+// Any other input — including empty, lowercase "y", or EOF — returns false.
+func promptConfirm(question string) bool {
+	fmt.Printf("  %s [Y/n] ", question)
+	line, err := bufio.NewReader(os.Stdin).ReadString('\n')
+	if err != nil {
+		return false
+	}
+	return strings.TrimSpace(line) == "Y"
 }

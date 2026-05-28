@@ -104,14 +104,14 @@ The `--delay` flag accepts any duration in hours (`h`). It overrides the `quaran
 
 ### `apply` — enforce the quarantine policy
 
-Writes pins to VS Code `settings.json` for extensions inside the quarantine window, and releases pins for extensions that have cleared it. **Dry-run by default** — always preview before writing.
+Writes pins to VS Code `settings.json` for extensions inside the quarantine window, and releases pins for extensions that have cleared it.
 
 ```bash
-aura-devshield apply             # preview what would change
-aura-devshield apply --confirm   # write changes to VS Code settings.json
+aura-devshield apply             # write changes to VS Code settings.json
+aura-devshield apply --dry-run   # preview what would change without writing
 ```
 
-What `--confirm` does:
+What `apply` does:
 
 - Adds `"publisher.name": false` to `extensions.autoUpdate` in VS Code `settings.json` for each quarantined extension — disabling silent auto-update for those extensions only.
 - Removes those entries once extensions clear the quarantine window, re-enabling auto-update.
@@ -121,8 +121,8 @@ What `--confirm` does:
 #### `--delay` with `apply`
 
 ```bash
-aura-devshield apply --delay 48h             # preview using a 48h window
-aura-devshield apply --delay 48h --confirm   # pin extensions newer than 48h
+aura-devshield apply --delay 48h             # pin extensions newer than 48h
+aura-devshield apply --delay 48h --dry-run   # preview using a 48h window
 ```
 
 The `--delay` flag works the same way as in `scan`: it overrides the quarantine window for this run only. **Use the same value for both commands** so that what `scan` flags is exactly what `apply` pins.
@@ -130,18 +130,18 @@ The `--delay` flag works the same way as in `scan`: it overrides the quarantine 
 ```bash
 # Recommended pattern — scan and apply with the same window:
 aura-devshield scan  --delay 72h
-aura-devshield apply --delay 72h --confirm
+aura-devshield apply --delay 72h
 ```
 
 ---
 
 ### `clean` — remove junk
 
-Remove old duplicate versions (keeping the highest semver), malformed extensions, and orphaned directories. **Dry-run by default.**
+Remove old duplicate versions (keeping the highest semver), malformed extensions, and orphaned directories.
 
 ```bash
-aura-devshield clean             # preview what would be removed
-aura-devshield clean --confirm   # actually delete
+aura-devshield clean             # actually delete
+aura-devshield clean --dry-run   # preview what would be removed
 ```
 
 ---
@@ -150,7 +150,7 @@ aura-devshield clean --confirm   # actually delete
 
 The first time you run `scan`, each installed extension version is recorded with a `first_seen` timestamp in `~/.aura-devshield/state.json`. Any version first seen less than `quarantine_days` ago (default: 7) is flagged as `vscode.update_in_quarantine`.
 
-Running `apply --confirm` writes a per-extension auto-update block into VS Code's `settings.json`. When the quarantine window expires, the next `apply --confirm` removes the block and re-enables auto-update.
+Running `apply` writes a per-extension auto-update block into VS Code's `settings.json`. When the quarantine window expires, the next `apply` removes the block and re-enables auto-update.
 
 **Why this works:** The community typically detects and reports compromised extension versions within hours to days of publication. A 7-day quarantine means you benefit from community detection before the update reaches your machine. Three supply-chain attacks on VS Code extensions were observed in May 2026 alone.
 
@@ -213,7 +213,7 @@ The `apply` subcommand reads and writes the following file:
 | Linux | `~/.config/Code/User/settings.json` |
 | Windows | `%APPDATA%\Code\User\settings.json` |
 
-Back this file up before running `apply --confirm` for the first time.
+Back this file up before running `apply` for the first time.
 
 ---
 
